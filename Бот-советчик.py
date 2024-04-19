@@ -40,6 +40,7 @@ async def help(update, context):
 
 
 async def book(update, context):
+    global is_book
     is_book = True
     await update.message.reply_text(
         "Отлично. Перейдем к выбору книги.", reply_markup=markup_for_books)
@@ -49,20 +50,105 @@ def book_by_author(author):
     res = cur.execute("""SELECT * FROM Books
             WHERE author = ?""", (author,)).fetchall()
     res_2 = "Вот какие произведения этого автора мне удалось найти:\n"
+    if len(res) == 0:
+        return "Мне ничего не удалось найти по вашему запросу. Извините."
     for i in range(len(res)):
         res_2 += res[i][1] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
+    return res_2
+
+
+def book_by_name(name):
+    res = cur.execute("""SELECT * FROM Books
+            WHERE name = ?""", (name,)).fetchall()
+    res_2 = "Вот какие книги с таким названием мне удалось найти:\n"
+    if len(res) == 0:
+        return "Мне ничего не удалось найти по вашему запросу. Извините."
+    for i in range(len(res)):
+        res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
+    return res_2
+
+
+def book_by_year(year):
+    res = cur.execute("""SELECT * FROM Books
+            WHERE year = ?""", (year,)).fetchall()
+    res_2 = "Вот какие книги, вышедшие в этот год, мне удалось найти:\n"
+    if len(res) == 0:
+        return "Мне ничего не удалось найти по вашему запросу. Извините."
+    for i in range(len(res)):
+        res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + "\n"
+    return res_2
+
+
+def book_by_series(series):
+    res = cur.execute("""SELECT * FROM Books
+            WHERE series = ?""", (series,)).fetchall()
+    res_2 = "Вот какие произведения из этого цикла мне удалось найти:\n"
+    if len(res) == 0:
+        return "Мне ничего не удалось найти по вашему запросу. Извините."
+    for i in range(len(res)):
+        res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
+    return res_2
+
+
+def book_by_type(typ):
+    res = cur.execute("""SELECT * FROM Books
+            WHERE type = ?""", (typ,)).fetchall()
+    res_2 = "Вот какие произведения этого жанра мне удалось найти:\n"
+    if len(res) == 0:
+        return "Мне ничего не удалось найти по вашему запросу. Извините."
+    for i in range(len(res)):
+        res_2 += res[i][1] + ", " + res[i][2] + ", " + str(res[i][6]) + "\n"
+    return res_2
+
+
+def book_by_genre(genre):
+    res = cur.execute("""SELECT * FROM Books
+            WHERE genre = ?""", (genre,)).fetchall()
+    res_2 = "Вот какие произведения этого направление мне удалось найти:\n"
+    if len(res) == 0:
+        return "Мне ничего не удалось найти по вашему запросу. Извините."
+    for i in range(len(res)):
+        res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
     return res_2
     
     
 
 
 async def analys(update, context):
-    #if is_book is True:
-    if "Автор: " in update.message.text:
-        author = update.message.text.split()
+    global is_book
+    if is_book is True:
+        if update.message.text.split()[0] == "Автор:":
+            author = update.message.text.split()
+            author = " ".join(author[1:])
+            await update.message.reply_text(book_by_author(author))
+            
+        elif update.message.text.split()[0] == "Название:":
+            name = update.message.text.split()
+            name = " ".join(name[1:])
+            await update.message.reply_text(book_by_name(name))
+
+        elif update.message.text.split()[0] == "Год:":
+            year = update.message.text.split()
+            year = " ".join(year[1:])
+            await update.message.reply_text(book_by_year(year))
+
+        elif update.message.text.split()[0] == "Цикл:":
+            series = update.message.text.split()
+            series = " ".join(series[1:])
+            await update.message.reply_text(book_by_series(series))
+
+        elif update.message.text.split()[0] == "Жанр:":
+            typ = update.message.text.split()
+            typ = " ".join(typ[1:])
+            await update.message.reply_text(book_by_type(typ))
+
+        elif update.message.text.split()[0] == "Направление:":
+            genre = update.message.text.split()
+            genre = " ".join(genre[1:])
+            await update.message.reply_text(book_by_genre(genre))
         
-        author = " ".join(author[1:])
-        await update.message.reply_text(book_by_author(author))
+        else:
+            await update.message.reply_text("Простите, но я не понял вашего запроса")
     else:
         await update.message.reply_text("Простите, но вы не выбрали, что я вам должен советовать.")
 
@@ -71,12 +157,30 @@ async def film(update, context):
         "Прекрасно. Приступим к выбору фильма.")
 
 async def back(update, context):
+    global is_book
     is_book = False
     await start(update, context)
 
 async def book_help(update, context):
-    await update.message.reply_text(
-        "Способы отбора: По автору: Введите Автор: <Имя автора сокращенное до инициалов и полной фамилии в именительном падеже> например Автор: Г. Уэллс")
+    tex = "Способы отбора:\n \nПо автору: Введите Автор: <Имя автора сокращенное"
+    tex += "до инициалов и полной фамилии в именительном падеже>"
+    tex += "\nНапример: Автор: Г. Уэллс\n"
+    
+    tex += "\nПо названию: Введите: Название: <название книги>"
+    tex += "\nНапример: Название: Знак четырёх\n"
+    
+    tex += "\nПо году: Введите: Год: <год публикации произведения>"
+    tex += "\nНапример: Год: 1954\n"
+
+    tex += "\nПо циклу: Введите: Цикл: <цикл, к которому принадлежит книга>"
+    tex += "\nНапример: Цикл: Властелин колец\n"
+
+    tex += "\nПо жанру: Введите: Жанр: <жанр, к которому принадлежит книга>"
+    tex += "\nНапример: Жанр: Повесть\n"
+
+    tex += "\nПо направлению: Введите: Направление: <направление, к которому принадлежит книга>"
+    tex += "\nНапример: Направление: Фэнтэзи"
+    await update.message.reply_text(tex)
 
 
 
