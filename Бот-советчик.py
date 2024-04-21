@@ -28,6 +28,7 @@ markup_for_chat = ReplyKeyboardMarkup(reply_keyboard_4, one_time_keyboard=False)
 is_book = False
 is_film = False
 is_chat = False
+first_ask = True
 
 con = sqlite3.connect("books and films.db")
 cur = con.cursor()
