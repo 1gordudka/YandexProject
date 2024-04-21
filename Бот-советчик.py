@@ -54,70 +54,209 @@ async def book(update, context):
 
 
 def book_by_author(author):
-    res = cur.execute("""SELECT * FROM Books
-            WHERE author = ?""", (author,)).fetchall()
-    res_2 = "Вот какие произведения этого автора мне удалось найти:\n"
-    if len(res) == 0:
-        return "Мне ничего не удалось найти по вашему запросу. Извините."
-    for i in range(len(res)):
-        res_2 += res[i][1] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
-    return res_2
+    global book_res
+    global first_ask
+    if first_ask:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE author = ?""", (author,)).fetchall()
+        book_res = res
+        res_2 = "Вот какие произведения этого автора мне удалось найти:\n"
+        if len(res) == 0:
+            return "Мне ничего не удалось найти по вашему запросу. Извините."
+        for i in range(len(res)):
+            res_2 += res[i][1] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
+        res_2 += "Указанием дальнейших критериев вы будете уточнять результаты поиска"
+        res_2 += "Для сброса критериев нажмите /book_reset"
+        first_ask = False
+        return res_2
+    else:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE author = ?""", (author,)).fetchall()
+        res_2 = []
+        if len(res) == 0:
+            first_ask = True
+            return "Мне ничего не удалось найти по вашему запросу. Извините. Критерии поиска сброшены."
+        for i in range(len(res)):
+            if res[i] in book_res:
+                res_2.append(res[i])
+        book_res = res_2
+        res_3 = "Вот результат вашего запроса:\n"
+        for i in range(len(res_2)):
+            res_3 += res_2[i][1] + "," + res_2[i][2] + ", " + res_2[i][5] + ", " + str(res_2[i][6]) + "\n"
+        return res_3
 
 
 def book_by_name(name):
-    res = cur.execute("""SELECT * FROM Books
-            WHERE name = ?""", (name,)).fetchall()
-    res_2 = "Вот какие книги с таким названием мне удалось найти:\n"
-    if len(res) == 0:
-        return "Мне ничего не удалось найти по вашему запросу. Извините."
-    for i in range(len(res)):
-        res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
-    return res_2
+    global book_res
+    global first_ask
+    if first_ask:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE name = ?""", (name,)).fetchall()
+        book_res = res
+        res_2 = "Вот какие книги с таким названием мне удалось найти:\n"
+        if len(res) == 0:
+            return "Мне ничего не удалось найти по вашему запросу. Извините."
+        for i in range(len(res)):
+            res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
+        res_2 += "Указанием дальнейших критериев вы будете уточнять результаты поиска"
+        res_2 += "Для сброса критериев нажмите /book_reset"
+        first_ask = False
+        return res_2
+    else:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE name = ?""", (name,)).fetchall()
+        res_2 = []
+        if len(res) == 0:
+            first_ask = True
+            return "Мне ничего не удалось найти по вашему запросу. Извините. Критерии поиска сброшены."
+        for i in range(len(res)):
+            if res[i] in book_res:
+                res_2.append(res[i])
+        book_res = res_2
+        res_3 = "Вот результат вашего запроса:\n"
+        for i in range(len(res_2)):
+            res_3 += res_2[i][1] + "," + res_2[i][2] + ", " + res_2[i][5] + ", " + str(res_2[i][6]) + "\n"
+        return res_3
 
 
 def book_by_year(year):
-    res = cur.execute("""SELECT * FROM Books
-            WHERE year = ?""", (year,)).fetchall()
-    res_2 = "Вот какие книги, вышедшие в этот год, мне удалось найти:\n"
-    if len(res) == 0:
-        return "Мне ничего не удалось найти по вашему запросу. Извините."
-    for i in range(len(res)):
-        res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + "\n"
-    return res_2
+    global book_res
+    global first_ask
+    if first_ask:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE year = ?""", (year,)).fetchall()
+        book_res = res
+        res_2 = "Вот какие книги, вышедшие в этот год, мне удалось найти:\n"
+        if len(res) == 0:
+            return "Мне ничего не удалось найти по вашему запросу. Извините."
+        for i in range(len(res)):
+            res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + "\n"
+        res_2 += "Указанием дальнейших критериев вы будете уточнять результаты поиска"
+        res_2 += "Для сброса критериев нажмите /book_reset"
+        first_ask = False
+        return res_2
+    else:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE year = ?""", (year,)).fetchall()
+        res_2 = []
+        if len(res) == 0:
+            first_ask = True
+            return "Мне ничего не удалось найти по вашему запросу. Извините. Критерии поиска сброшены."
+        for i in range(len(res)):
+            if res[i] in book_res:
+                res_2.append(res[i])
+        book_res = res_2
+        res_3 = "Вот результат вашего запроса:\n"
+        for i in range(len(res_2)):
+            res_3 += res_2[i][1] + "," + res_2[i][2] + ", " + res_2[i][5] + ", " + str(res_2[i][6]) + "\n"
+        return res_3
 
 
 def book_by_series(series):
-    res = cur.execute("""SELECT * FROM Books
-            WHERE series = ?""", (series,)).fetchall()
-    res_2 = "Вот какие произведения из этого цикла мне удалось найти:\n"
-    if len(res) == 0:
-        return "Мне ничего не удалось найти по вашему запросу. Извините."
-    for i in range(len(res)):
-        res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
-    return res_2
+    global book_res
+    global first_ask
+    if first_ask:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE series = ?""", (series,)).fetchall()
+        book_res = res
+        res_2 = "Вот какие произведения из этого цикла мне удалось найти:\n"
+        if len(res) == 0:
+            return "Мне ничего не удалось найти по вашему запросу. Извините."
+        for i in range(len(res)):
+            res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
+        res_2 += "Указанием дальнейших критериев вы будете уточнять результаты поиска"
+        res_2 += "Для сброса критериев нажмите /book_reset"
+        first_ask = False
+        return res_2
+    else:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE series = ?""", (series,)).fetchall()
+        res_2 = []
+        if len(res) == 0:
+            first_ask = True
+            return "Мне ничего не удалось найти по вашему запросу. Извините. Критерии поиска сброшены."
+        for i in range(len(res)):
+            if res[i] in book_res:
+                res_2.append(res[i])
+        book_res = res_2
+        res_3 = "Вот результат вашего запроса:\n"
+        for i in range(len(res_2)):
+            res_3 += res_2[i][1] + "," + res_2[i][2] + ", " + res_2[i][5] + ", " + str(res_2[i][6]) + "\n"
+        return res_3
 
 
 def book_by_type(typ):
-    res = cur.execute("""SELECT * FROM Books
-            WHERE type = ?""", (typ,)).fetchall()
-    res_2 = "Вот какие произведения этого жанра мне удалось найти:\n"
-    if len(res) == 0:
-        return "Мне ничего не удалось найти по вашему запросу. Извините."
-    for i in range(len(res)):
-        res_2 += res[i][1] + ", " + res[i][2] + ", " + str(res[i][6]) + "\n"
-    return res_2
+    global book_res
+    global first_ask
+    if first_ask:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE type = ?""", (typ,)).fetchall()
+        book_res = res
+        res_2 = "Вот какие произведения этого жанра мне удалось найти:\n"
+        if len(res) == 0:
+            return "Мне ничего не удалось найти по вашему запросу. Извините."
+        for i in range(len(res)):
+            res_2 += res[i][1] + ", " + res[i][2] + ", " + str(res[i][6]) + "\n"
+        res_2 += "Указанием дальнейших критериев вы будете уточнять результаты поиска"
+        res_2 += "Для сброса критериев нажмите /book_reset"
+        first_ask = False
+        return res_2
+    else:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE type = ?""", (typ,)).fetchall()
+        res_2 = []
+        if len(res) == 0:
+            first_ask = True
+            return "Мне ничего не удалось найти по вашему запросу. Извините. Критерии поиска сброшены."
+        for i in range(len(res)):
+            if res[i] in book_res:
+                res_2.append(res[i])
+        book_res = res_2
+        res_3 = "Вот результат вашего запроса:\n"
+        for i in range(len(res_2)):
+            res_3 += res_2[i][1] + "," + res_2[i][2] + ", " + res_2[i][5] + ", " + str(res_2[i][6]) + "\n"
+        return res_3
 
 
 def book_by_genre(genre):
-    res = cur.execute("""SELECT * FROM Books
-            WHERE genre = ?""", (genre,)).fetchall()
-    res_2 = "Вот какие произведения этого направление мне удалось найти:\n"
-    if len(res) == 0:
-        return "Мне ничего не удалось найти по вашему запросу. Извините."
-    for i in range(len(res)):
-        res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
-    return res_2
-    
+    global book_res
+    global first_ask
+    if first_ask:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE genre = ?""", (genre,)).fetchall()
+        book_res = res
+        res_2 = "Вот какие произведения этого направление мне удалось найти:\n"
+        if len(res) == 0:
+            return "Мне ничего не удалось найти по вашему запросу. Извините."
+        for i in range(len(res)):
+            res_2 += res[i][1] + ", " + res[i][2] + ", " + res[i][5] + ", " + str(res[i][6]) + "\n"
+        res_2 += "Указанием дальнейших критериев вы будете уточнять результаты поиска"
+        res_2 += "Для сброса критериев нажмите /book_reset"
+        first_ask = False
+        return res_2
+    else:
+        res = cur.execute("""SELECT * FROM Books
+                WHERE genre = ?""", (genre,)).fetchall()
+        res_2 = []
+        if len(res) == 0:
+            first_ask = True
+            return "Мне ничего не удалось найти по вашему запросу. Извините. Критерии поиска сброшены."
+        for i in range(len(res)):
+            if res[i] in book_res:
+                res_2.append(res[i])
+        book_res = res_2
+        res_3 = "Вот результат вашего запроса:\n"
+        for i in range(len(res_2)):
+            res_3 += res_2[i][1] + "," + res_2[i][2] + ", " + res_2[i][5] + ", " + str(res_2[i][6]) + "\n"
+        return res_3
+
+
+async def book_reset(update, context):
+    global book_res
+    global first_ask
+    first_ask = True
+    book_res = 0
+    await update.message.reply_text("Критерии поиска сброшены")
     
 
 
@@ -324,6 +463,7 @@ def main():
     application.add_handler(text_handler)
     application.add_handler(CommandHandler("book", book))
     application.add_handler(CommandHandler("book_help", book_help))
+    application.add_handler(CommandHandler("book_reset", book_reset))
     application.add_handler(CommandHandler("film_help", film_help))
     application.add_handler(CommandHandler("chat_help", chat_help))
     application.add_handler(CommandHandler("back", back))
@@ -336,3 +476,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
