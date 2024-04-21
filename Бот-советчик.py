@@ -5,7 +5,8 @@ from telegram.ext import CommandHandler
 from telegram import ReplyKeyboardMarkup
 from telegram import ReplyKeyboardRemove
 import sqlite3
-
+from langchain.schema import HumanMessage, SystemMessage
+from langchain.chat_models.gigachat import GigaChat
 
 BOT_TOKEN = "7139603494:AAGt8dTpHeWREpHXnutdVBcJryop0EhXwOk"
 
@@ -15,15 +16,18 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-reply_keyboard = [['/book', '/film', "/help"]]
+reply_keyboard = [['/book', '/film', "/help", "/chat"]]
 reply_keyboard_2 = [['/book_help', '/back']]
 reply_keyboard_3 = [['/film_help', '/back']]
+reply_keyboard_4 = [['/chat_help', '/back']]
 markup = ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard=False)
 markup_for_books = ReplyKeyboardMarkup(reply_keyboard_2, one_time_keyboard=False)
 markup_for_films = ReplyKeyboardMarkup(reply_keyboard_3, one_time_keyboard=False)
+markup_for_chat = ReplyKeyboardMarkup(reply_keyboard_4, one_time_keyboard=False)
 
 is_book = False
 is_film = False
+is_chat = False
 
 con = sqlite3.connect("books and films.db")
 cur = con.cursor()
@@ -120,8 +124,9 @@ def book_by_genre(genre):
 async def analys(update, context):
     global is_book
     global is_film
+    global is_chat
 
-    if is_book is True or is_film is True:
+    if is_book is True or is_film is True or is_chat is True:
         if is_book is True:
             if update.message.text.split()[0] == "Автор:":
                 author = update.message.text.split()
@@ -178,6 +183,17 @@ async def analys(update, context):
                 await update.message.reply_text(film_by_series(series))
             else:
                 await update.message.reply_text("Простите, но я не понял вашего запроса")
+        if is_chat is True:
+            chat = GigaChat(credentials='MjlhNDFhNTQtMDFlNC00OWQ1LTllOTAtNGFjZTZiNzU4MWJmOjNhM2ZhNTQ3LWY0YjctNGViMy04MzFlLTI3YjI4YTY0M2Q5Yw==', verify_ssl_certs=False)
+            messages = [
+                    SystemMessage(
+                        content="Ты эмпатичный бот-советчик, который помогает найти все, что хочет пользователь"
+                    )
+                ]
+            messages.append(HumanMessage(content=update.message.text))
+            res = chat(messages)
+            messages.append(res)
+            await update.message.reply_text(res.content)
     else:
         await update.message.reply_text("Простите, но вы не выбрали, что я вам должен советовать.")
 
@@ -258,7 +274,9 @@ async def film_help(update, context):
 async def back(update, context):
     global is_book
     global is_film
+    global is_chat
     is_film = False
+    is_chat = False
     is_book = False
     await start(update, context)
 
@@ -283,6 +301,20 @@ async def book_help(update, context):
     tex += "\nНапример: Направление: Фэнтэзи"
     await update.message.reply_text(tex)
 
+async def chat_help(update, context):
+    tex = "Привет! Я чат-бот, который поможет тебе определиться\n"
+    tex += "с выбором фильма или книги.\n"
+    tex += "Просто начни фразу, например так:\n"
+    tex += '"Посоветуй мне фильм, похожий на Гарри Поттера"\n'
+
+    await update.message.reply_text(tex)
+
+async def chat(update, context):
+    global is_chat
+    is_chat = True
+    await update.message.reply_text(
+        "Прекрасно. Подскажите, что посоветовать?", reply_markup=markup_for_chat)
+
 
 
 
@@ -293,8 +325,10 @@ def main():
     application.add_handler(CommandHandler("book", book))
     application.add_handler(CommandHandler("book_help", book_help))
     application.add_handler(CommandHandler("film_help", film_help))
+    application.add_handler(CommandHandler("chat_help", chat_help))
     application.add_handler(CommandHandler("back", back))
     application.add_handler(CommandHandler("film", film))
+    application.add_handler(CommandHandler("chat", chat))
     application.add_handler(CommandHandler("help", help))
     application.add_handler(CommandHandler("start", start))
     application.run_polling()
